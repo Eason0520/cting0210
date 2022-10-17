@@ -792,7 +792,88 @@ id 空闲 CPU时间，一般来说，id + us + sy = 100,一般我认为id是空�
 wt 等待IO CPU时间。
 ```
 
-```html
 
+
+## 防火墙常用命令
+
+### firewalld
+
+```shell
+# 服务状态检查
+#   出现Active: active (running)=代表开启
+#   出现 Active: inactive (dead)=代表没有开启
+systemctl status firewalld
+
+# 启动防火墙
+systemctl start firewalld
+# 或着
+service firewalld start
+
+# 重新启动防火墙
+systemctl restart firewalld
+
+# 关闭防火墙
+systemctl stop firewalld
+# 或者
+service firewalld stop
+
+# 设置开机启动防火墙
+systemctl enable firewalld.service
+
+# 设置开机禁止防火墙
+systemctl disable firewalld.service
+
+```
+
+### firewall-cmd命令
+
+```shell
+# 查看防火墙规则
+firewall-cmd --list-all
+
+# 查看防火墙状态
+firewall-cmd --state
+
+# 重新加载配置
+firewall-cmd --reload
+
+# 查询端口号80 是否开启：
+firewall-cmd --query-port=80/tcp
+
+# 打开关闭端口,具体参数讲解: --permanent：设置为永久  --add-port：添加的端口，格式为端口/通讯协议  --zone ：作用域
+firewall-cmd --zone=public --add-port=8081/tcp --permanent
+
+# 永久开放80端口号：
+firewall-cmd --permanent --zone=public --add-port=80/tcp
+
+# 移除80端口号：
+firewall-cmd --permanent --zone=public --remove-port=80/tcp
+
+# 关闭临时端口
+firewall-cmd --remove-port=80/tcp
+
+# 配置结束后需要输入重载命令并重启防火墙以生效配置
+```
+
+### iptables
+
+```shell
+# 查看防火墙状态
+service iptables status
+
+# 停止防火墙
+service iptables stop
+
+# 启动防火墙
+service iptables start
+
+# 重启防火墙
+service iptables restart
+
+# 永久关闭防火墙
+chkconfig iptables off
+
+# 永久关闭后重启 
+chkconfig iptables on
 ```
 

@@ -52,7 +52,12 @@ docker images|grep tengine
 # 运行指令
 docker run -it -d --name docker_tengine \
       -v /data/docker_tengine/nginx.conf:/etc/nginx/conf.d/example.com.conf \
-      -p "8080:80" -p 443:443 axizdkr/tengine
+      -p "80:80" -p 443:443 axizdkr/tengine
+
+docker exec -it -d --name docker_tengine \
+	  -v example.com.conf:/etc/nginx/conf.d/example.com.conf \
+      -v nginx.conf:/etc/nginx/nginx.conf \
+      -p "80:80" -p 443:443 axizdkr/tengine
 
 参数说明：
 -p 表示端口映射
