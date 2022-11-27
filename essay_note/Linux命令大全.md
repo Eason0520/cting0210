@@ -877,3 +877,108 @@ chkconfig iptables off
 chkconfig iptables on
 ```
 
+
+
+## yum 命令
+
+### yum 源配置
+
+yum，全称“Yellow dog Updater, Modified”，是一个专门为了解决包的依赖关系而存在的软件包管理器。就好像 Windows 系统上可以通过 360 软件管家实现软件的一键安装、升级和卸载，Linux 系统也提供有这样的工具，就是 yum。
+
+```shell
+# yum 软件可以用 rpm 命令安装，安装之前可以通过如下命令查看 yum 是否已安装
+rpm -qa | grep yum
+```
+
+#### 网络 yum 源搭建
+
+一般情况下，只要你的主机网络正常，可以直接使用网络 yum 源，不需要对配置文件做任何修改，这里对 yum 源配置文件做一下简单介绍。
+
+网络 yum 源配置文件位于 /etc/yum.repos.d/ 目录下，文件扩展名为"*.repo"（只要扩展名为 "*.repo" 的文件都是 yum 源的配置文件），通常情况下 CentOS-Base.repo 文件生效。
+
+```shell
+ls /etc/yum.repos.d/
+```
+
+#### 本地 yum 源
+
+在无法联网的情况下，yum 可以考虑用本地光盘（或安装映像文件）作为 yum 源。
+
+Linux 系统安装映像文件中就含有常用的 RPM 包，我们可以使用压缩文件打开映像文件（iso文件），进入其 Packages 子目录。
+
+```shell
+# 创建cdrom目录，作为光盘的挂载点
+mkdir /mnt/cdrom
+# 挂载光盘到/mnt/cdrom目录下
+mount /dev/cdrom /mnt/cdrom/
+
+# 配置本地文件
+cat <<EOF >/etc/yum.repos.d/local.repo
+[local]
+name=local
+baseurl=file:///mnt/cdrom
+gpgcheck=0
+enabled=1
+EOF
+
+# 清理本地缓存
+yum clean all 
+# 清理插件缓存
+yum clean plugins 
+# 构建缓存
+yum makecache       
+
+# 安装开发攻击
+yum group install -y "Development Tools"
+```
+
+
+
+### yum 查询命令
+
+```shell
+# 查询所有已安装和可安装的软件包
+yum list
+# 查询执行软件包的安装情况
+yum list 包名
+# 从 yum 源服务器上查找与关键字相关的所有软件包
+yum search 关键字
+# 查询执行软件包的详细信息
+yum info 包名
+```
+
+### yum 安装命令
+
+```shell
+# yum 安装软件包的命令基本格式
+yum -y install 包名
+# 例 yum 命令安装 gcc，gcc是C语言的编译器，鉴于该软件包涉及到的依赖包较多，建议使用 yum 命令安装。
+yum -y install gcc
+```
+
+其中：
+
+- install：表示安装软件包。
+- -y：自动回答 yes。如果不加 -y，那么每个安装的软件都需要手工回答 yes；
+
+### yum 升级命令
+
+```shell
+# yum 升级软件包常用命令
+
+# 升级所有软件包。不过考虑到服务器强调稳定性，因此该命令并不常用。
+yum -y update
+# 升级特定的软件包
+yum -y update 包名
+```
+
+### yum 卸载命令
+
+使用 yum 卸载软件包时，会同时卸载所有与该包有依赖关系的其他软件包，即便有依赖包属于系统运行必备文件，也会被 yum 无情卸载，带来的直接后果就是使系统崩溃。
+
+**除非你能确定卸载此包以及它的所有依赖包不会对系统产生影响，否则不要使用 yum 卸载软件包**
+
+```
+yum remove 包名
+```
+
