@@ -198,3 +198,195 @@ rewrite ^(.*)$  https://$host$1 permanent;#将http转成https
 
 
 
+## 第十步：Nginx 服务器中禁止恶意扫描与垃圾爬虫
+
+### ng版本查询
+
+```shell
+$ nginx -v
+nginx version: nginx/1.18.0
+```
+
+### 屏蔽恶意IP地址
+
+#### 使用 awk 命令查询访问最频繁的IP
+
+```shell
+$ cd /usr/local/nginx/logs
+# 使用 awk 命令查询访问最频繁的IP
+$ awk '{print $1}' access.log|sort | uniq -c |sort -n -k 1 -r|more
+
+# 使用 awk 命令查询访问最频繁的链接
+$ awk '{print $7}' access.log|sort | uniq -c |sort -n -k 1 -r|more
+```
+
+#### 使用 deny 指令屏蔽 IP： 
+
+deny 指令在 Nginx 的 http, server, location 上下文中指定
+
+```shell
+http {
+    deny 108.179.194.35; # 扫描 wordpress 
+    deny 159.203.31.171; # 扫描 wp-login
+    deny 158.69.243.0/24;  # MJ12bot
+    deny 46.229.168.0/24;  # SemRush 
+    deny 54.36.148.0/24;   # AhrefsBot 
+    deny 54.36.149.0/24;   # AhrefsBot
+}
+```
+
+#### 使用allow 指令指明哪些IP可以访问：
+
+```shell
+location /admin {
+    allow 192.168.1.0/24;
+    allow 112.66.77.88;
+    allow 112.65.12.0/24;
+    deny  all;
+}
+```
+
+#### 根据后缀名屏蔽掉一批请求:
+
+```nginx
+# 屏蔽恶意访问
+if ($document_uri ~* \.(php|asp|aspx|jsp|swp|git|env|yaml|yml|sql|db|bak|ini|docx|doc|rar|tar|gz|zip|log)$) {
+    return 404;
+}
+# 说明，这里使用 if 语句，匹配以 `.` 开始，以 php、asp 、jsp 、env 等后缀结尾的文件，如果存在，nginx 则直接返回 404 给客户端。
+```
+
+#### 根据关键词屏蔽一批请求:
+
+```nginx
+if ($document_uri ~* (wordpress|phpinfo|wlwmanifest|phpMyAdmin|xmlrpc)) {
+    return 404;
+}
+```
+
+#### 屏蔽恶意爬虫:
+
+浏览器或者爬虫工具访问，一般都会带有 User Agent (浏览器用户标识)
+
+```nginx
+server {
+    # 禁止Scrapy等工具的抓取
+    if ($http_user_agent ~* (Scrapy|HttpClient|PostmanRuntime|ApacheBench|Java||python-requests|Python-urllib|node-fetch)) {
+        return 403;
+    }
+
+    # 禁止指定的 user agent 以及为空的访问
+    if ($http_user_agent ~ "Nimbostratus|MJ12bot|MegaIndex|YisouSpider|^$" ) {
+        return 403;             
+    }
+}
+```
+
+### 对IP和服务进行限流
+
+Nginx 提供了2个模块来处理限流，分别是 ngx_http_limit_conn_module 和 ngx_http_limit_req_module 模块
+
+```nginx
+http {
+    ##### limit
+    limit_conn_zone $binary_remote_addr zone=perIP:10m;
+    limit_conn_zone $server_name zone=perServer:10m;
+    limit_conn perIP 10;
+    limit_conn perServer 200;
+    limit_conn_status 503;
+}
+
+# 上边的配置会对全站都生效。如果只是想对某个 uri 限流，可以将 limit_conn 写在 location 上下文里
+http {
+    limit_conn_zone $binary_remote_addr zone=addr:10m;
+    
+    server {
+        location /download/ {
+            limit_conn addr 1;
+        }
+    }
+}
+```
+
+### 配置使用示例
+
+为了方便管理，我们创建两个配置文件，对ip和spider分别管理
+
+屏蔽IP访问 block_ips.conf
+
+```nginx
+# 屏蔽IP访问 block_ips.conf
+deny 108.179.194.35;   # 扫描 wordpress 
+deny 159.203.31.171;   # 扫描 wp-login
+deny 158.69.243.0/24;  # MJ12bot
+deny 46.229.168.0/24;  # SemRush 
+deny 54.36.148.0/24;   # AhrefsBot 
+deny 54.36.149.0/24;   # AhrefsBot
+```
+
+屏蔽UA访问 block_spiders.conf
+
+```nginx
+# 屏蔽UA访问 block_spiders.conf
+# 禁止Scrapy等工具的抓取
+if ($http_user_agent ~* (Scrapy|HttpClient|PostmanRuntime|ApacheBench|Java||python-requests|Python-urllib|node-fetch)) {
+    return 403;
+}
+
+# 禁止指定的 user agent 以及为空的访问
+if ($http_user_agent ~ "Nimbostratus|MJ12bot|MegaIndex|YisouSpider|^$" ) {
+    return 403;             
+}
+
+# 屏蔽恶意访问
+if ($document_uri ~* \.(php|asp|aspx|jsp|swp|git|env|yaml|yml|sql|db|bak|ini|docx|doc|rar|tar|gz|zip|log)$) {
+    return 404;
+}
+
+# 屏蔽指定关键词
+if ($document_uri ~* (wordpress|phpinfo|wlwmanifest|phpMyAdmin|xmlrpc)) {
+    return 404;
+}
+```
+
+nginx.conf 中引入 include 
+
+```nginx
+http {
+    include       mime.types;
+    default_type  text/html;
+
+    ##### limit 限流
+    limit_conn_zone $binary_remote_addr zone=perIP:10m;
+    limit_conn_zone $server_name zone=perServer:10m;
+    limit_conn perIP 10;
+    limit_conn perServer 200;
+    limit_conn_status 503;
+
+    ### 引入屏蔽规则
+    include /etc/nginx/block_ips.conf;
+    include /etc/nginx/block_spiders.conf;
+
+    ### 其他配置
+}
+```
+
+## 温馨提示，重启前记得测试 配置文件是否有错误。
+
+```shell
+$ cd /usr/local/nginx
+$ sbin/nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
+
+
+
+## 参考链接
+
+[nginx.org/en/docs/](https://link.juejin.cn/?target=https%3A%2F%2Fnginx.org%2Fen%2Fdocs%2F)
+
+[ssrvps.org/archives/53…](https://link.juejin.cn/?target=https%3A%2F%2Fssrvps.org%2Farchives%2F5370)
+
+[wang123.net/posts/nginx…](https://link.juejin.cn/?target=https%3A%2F%2Fwang123.net%2Fposts%2Fnginx-how-to-block-url-and-ip-address)
+
