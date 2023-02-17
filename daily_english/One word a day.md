@@ -28,4 +28,14 @@ If you set a goal and move forward step by step. 如果你认定了目标就一�
 
 Life could be turned around at any time. 人生随时都有翻盘的可能
 
-## 2022-11-02
+## 2023-02-16
+
+That's neat. 好极了
+
+Are you sure? 你确定吗？
+
+Do I have to? 非做不可吗？
+
+Here you are. 给你
+
+he is my age. 他和我同岁
