@@ -1,5 +1,7 @@
 # Linux命令总结
 
+查看wifi密码：netsh wlan show profiles WiFi名称 key=clear
+
 ## 基本操作
 
 ### Linux关机 | 重启
