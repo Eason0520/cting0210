@@ -4,6 +4,8 @@ GitHub 个人令牌：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
 
 
 
+
+
 git config --system --unset credential.helper
 
  git remote set-url 远程仓库的名称（默认为origin） https://刚刚复制的口令@github.com/你的仓库的用户名称/仓库名称.git
