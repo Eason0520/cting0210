@@ -39,3 +39,18 @@ Do I have to? 非做不可吗？
 Here you are. 给你
 
 he is my age. 他和我同岁
+
+## 2023-05-30
+
+Hi! How are you? 嗨！你好吗？
+
+The weather is getting cold,you have to take care of yourself. 天气渐冷，你要照顾好自己
+
+Eat well. Sleep on time. 好好吃饭。按时睡觉。
+
+Study hard and work hard. 认真学习，努力工作。
+
+Just remember, you can also be excellent. 请记住，你也可以很优秀。
+
+Promise me, you will do your best to be the best of yourself. 答应我，你会尽全力成为最好的自己。
+
