@@ -1,5 +1,7 @@
 # 个人知识随笔
 
+GitHub 个人令牌：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
+
 GitHub 个人令牌[idea-use]：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
 
 
