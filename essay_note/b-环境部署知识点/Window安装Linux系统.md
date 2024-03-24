@@ -85,7 +85,7 @@ set-timezone Asia/Shanghai （说明：在Linux系统中设置系统的时区为
 
 
 
-6.设置密码，可以先不设置用户。设置的密码要记得哦
+6.设置密码，可以先不设置用户。设置的密码要记得哦::::: root  R00t123456
 
 ![在这里插入图片描述](assets/Window安装Linux系统/7fbcb38440fe463e96157fb9b06ae129.png)
 
