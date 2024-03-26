@@ -98,3 +98,17 @@ set-timezone Asia/Shanghai （说明：在Linux系统中设置系统的时区为
 ![在这里插入图片描述](assets/Window安装Linux系统/ac7e651b69544c82b38b325c8ab7ffc4.png)
 
 ![在这里插入图片描述](assets/Window安装Linux系统/6749c94706b9426faee4b3c0e9b8afc0.png)
+
+
+
+配置服务器
+ifconfig不能用
+使用 ip addr 查看网卡名称是： enp2s0
+vi /etc/sysconfig/network-scripts/ifcfg-enp2s0 把 ONBOOT 改成 yes
+重启网卡：service network restart
+更新所有的repo: yum update
+安装网络工具： yum -y install net-tools 才能使用 ifconfig 和 netstat 等
+使用 ifconfig 找到了内网IP： 192.168.31.214
+通过putty登录如下：（下图可以看到所有的硬盘都被使用了。哦耶）
+
+![在这里插入图片描述](assets/Window安装Linux系统/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xpaGVuZ3prag==,size_16,color_FFFFFF,t_70#pic_center.png)
