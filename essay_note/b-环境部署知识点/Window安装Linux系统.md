@@ -112,3 +112,53 @@ vi /etc/sysconfig/network-scripts/ifcfg-enp2s0 把 ONBOOT 改成 yes
 通过putty登录如下：（下图可以看到所有的硬盘都被使用了。哦耶）
 
 ![在这里插入图片描述](assets/Window安装Linux系统/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xpaGVuZ3prag==,size_16,color_FFFFFF,t_70#pic_center.png)
+
+
+
+
+
+![img](assets/Window安装Linux系统/v2-d04859ac083621843e734cbd7185732a_720w.webp)
+
+****
+
+重启网络，命令行：`service network restart`
+
+*3.3.4 配置DNS* 修改NetworkManager.conf 配置文件
+
+```text
+vim /etc/NetworkManager/NetworkManager.conf
+```
+
+在[main]中添加 	
+
+```text
+dns=no
+```
+
+![img](assets/Window安装Linux系统/v2-dfb37861b5c039e70ade7dc9c993684b_720w.webp)
+
+修改resolv.conf配置文件
+
+```text
+vim /etc/resolv.conf
+```
+
+添加
+
+![img](assets/Window安装Linux系统/v2-2a8268b5bf1a51fedde1e67111b521f3_720w.webp)
+
+
+
+```text
+#主DNS服务器，虚拟机中一般dns1设置为网关，2设置为外网dns
+nameserver 192.168.10.2
+
+#备DNS服务器
+nameserver 114.114.114.114
+```
+
+重启NetworkManager
+
+```text
+systemctl restart NetworkManager
+```
